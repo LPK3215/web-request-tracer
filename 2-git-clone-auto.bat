@@ -71,8 +71,16 @@ echo 将拉取: !FINAL_REPO!
 echo.
 
 REM 从仓库地址提取文件夹名
+set REPO_NAME=
 for %%i in ("!FINAL_REPO!") do set REPO_NAME=%%~ni
+REM 移除可能的 .git 后缀
+set REPO_NAME=!REPO_NAME:.git=!
+REM 如果提取失败，使用默认名称
 if "!REPO_NAME!"=="" set REPO_NAME=repo
+REM 移除可能的特殊字符
+set REPO_NAME=!REPO_NAME::=!
+set REPO_NAME=!REPO_NAME:/=!
+set REPO_NAME=!REPO_NAME:\=!
 echo 目标文件夹: !REPO_NAME!
 echo.
 

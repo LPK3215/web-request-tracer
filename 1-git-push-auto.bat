@@ -64,7 +64,12 @@ if not exist ".git" (
     set /p DO_INIT=是否要初始化为Git仓库？（输入 yes 或直接回车取消）: 
     if /i "!DO_INIT!"=="yes" (
         echo 正在初始化Git仓库...
-        git init
+        git init -b %DEFAULT_BRANCH%
+        if errorlevel 1 (
+            REM 旧版本 Git 不支持 -b 参数，使用传统方式
+            git init
+            git checkout -b %DEFAULT_BRANCH% 2>nul
+        )
         echo 初始化完成
         echo.
     ) else (
@@ -101,15 +106,18 @@ if "!CURRENT_REPO!"=="" (
     ) else (
         set FINAL_REPO=!INPUT_REPO!
     )
-    git remote add origin "!FINAL_REPO!"
+    git remote add origin "!FINAL_REPO!" 2>nul
+    if errorlevel 1 (
+        echo [警告] 添加远程仓库失败，可能已存在，尝试更新...
+        git remote set-url origin "!FINAL_REPO!"
+    )
     echo 已设置远程仓库: !FINAL_REPO!
     echo.
 ) else (
+    set FINAL_REPO=!CURRENT_REPO!
     echo [当前远程仓库] !CURRENT_REPO!
     set /p INPUT_REPO=直接回车使用当前地址，或输入新地址: 
-    if "!INPUT_REPO!"=="" (
-        set FINAL_REPO=!CURRENT_REPO!
-    ) else (
+    if not "!INPUT_REPO!"=="" (
         set FINAL_REPO=!INPUT_REPO!
         git remote set-url origin "!FINAL_REPO!"
         echo 已更新远程仓库: !FINAL_REPO!
@@ -200,8 +208,13 @@ set HAS_UNPUSHED=0
 if %HAS_STAGED_CHANGES% equ 1 (
     set HAS_UNPUSHED=1
 ) else (
+    REM 获取当前分支名
+    set CHECK_BRANCH=
+    for /f "delims=" %%i in ('git branch --show-current 2^>nul') do set CHECK_BRANCH=%%i
+    if "!CHECK_BRANCH!"=="" set CHECK_BRANCH=%DEFAULT_BRANCH%
+    
     REM 检查远程分支是否存在
-    git rev-parse --verify origin/%DEFAULT_BRANCH% >nul 2>&1
+    git rev-parse --verify origin/!CHECK_BRANCH! >nul 2>&1
     if errorlevel 1 (
         REM 远程分支不存在，检查本地是否有提交
         git rev-parse HEAD >nul 2>&1
@@ -211,7 +224,7 @@ if %HAS_STAGED_CHANGES% equ 1 (
         )
     ) else (
         REM 远程分支存在，比较本地和远程
-        git diff --quiet origin/%DEFAULT_BRANCH% HEAD 2>nul
+        git diff --quiet origin/!CHECK_BRANCH! HEAD 2>nul
         if errorlevel 1 (
             set HAS_UNPUSHED=1
             echo [提示] 检测到本地有未推送的提交
