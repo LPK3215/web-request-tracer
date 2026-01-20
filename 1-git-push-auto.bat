@@ -178,15 +178,41 @@ if "!ADD_FILES!"=="" (
     git add !ADD_FILES!
 )
 
+REM 检查是否有需要提交的改动
 git diff --cached --quiet
-if errorlevel 1 (
+set HAS_STAGED_CHANGES=%errorlevel%
+
+if %HAS_STAGED_CHANGES% equ 1 (
     echo.
     set /p COMMIT_MSG=请输入提交信息（直接回车默认为 "%DEFAULT_COMMIT_MSG%"）: 
     if "!COMMIT_MSG!"=="" set COMMIT_MSG=%DEFAULT_COMMIT_MSG%
     echo 正在提交...
     git commit -m "!COMMIT_MSG!"
     echo.
-    
+) else (
+    echo.
+    echo [提示] 暂存区没有改动，跳过提交步骤
+    echo.
+)
+
+REM 检查是否有未推送的提交
+git rev-parse @{u} >nul 2>&1
+if errorlevel 1 (
+    set HAS_UNPUSHED=1
+    echo [提示] 检测到本地有提交但远程分支不存在，需要推送
+) else (
+    git diff --quiet @{u} @
+    if errorlevel 1 (
+        set HAS_UNPUSHED=1
+        echo [提示] 检测到本地有未推送的提交
+    ) else (
+        set HAS_UNPUSHED=0
+    )
+)
+
+if %HAS_STAGED_CHANGES% equ 1 set HAS_UNPUSHED=1
+
+if !HAS_UNPUSHED! equ 1 (
     REM 检测当前分支
     set CURRENT_BRANCH=
     for /f "delims=" %%i in ('git branch --show-current 2^>nul') do set CURRENT_BRANCH=%%i
@@ -211,17 +237,18 @@ if errorlevel 1 (
         echo   本地目录: %cd%
         echo   远程仓库: !FINAL_REPO!
         echo   推送分支: !TARGET_BRANCH!
-        echo   提交信息: !COMMIT_MSG!
+        if %HAS_STAGED_CHANGES% equ 1 (
+            echo   提交信息: !COMMIT_MSG!
+        )
         echo   用户: !GIT_NAME! ^<!GIT_EMAIL!^>
-        echo ----------------------------------------
-        echo   本次提交的文件:
-        git diff --name-only HEAD~1 HEAD 2>nul
         echo ========================================
     )
 ) else (
     echo.
     echo ========================================
-    echo   [提示] 没有改动需要提交
+    echo   [提示] 没有需要推送的内容
+    echo   - 暂存区无改动
+    echo   - 本地无未推送的提交
     echo ========================================
 )
 
