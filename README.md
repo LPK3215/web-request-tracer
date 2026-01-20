@@ -2,6 +2,9 @@
 
 一个通用的浏览器网络请求追踪工具，支持 XHR/fetch 请求的捕获、分析和导出。可用于 API 逆向工程、调试、性能分析等场景。
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/yourusername/web-request-tracer)
+
 ## 功能特性
 
 - 🎯 **灵活的采集模式**
@@ -24,25 +27,25 @@
 - 自动化测试数据收集
 - Web 应用安全审计
 
-## 使用方式
+## 快速开始
 
-### 方式一：控制台版本（batchexecute_trace_recorder.js）
+### 方式一：控制台版本（推荐用于临时测试）
 
 适合临时使用或快速测试：
 
 1. 打开目标网站
 2. 打开浏览器 DevTools Console（F12）
-3. 复制粘贴 `batchexecute_trace_recorder.js` 的内容并回车
+3. 复制粘贴 `src/batchexecute_trace_recorder.js` 的内容并回车
 4. 点击右下角面板的 "Start" 按钮开始记录
 5. 执行需要追踪的操作
 6. 点击 "Download JSON" 导出数据
 
-### 方式二：用户脚本版本（batchexecute_trace_recorder.user.js）
+### 方式二：用户脚本版本（推荐用于长期使用）
 
 适合长期使用或自动化场景：
 
 1. 安装 [Tampermonkey](https://www.tampermonkey.net/) 或其他用户脚本管理器
-2. 安装 `batchexecute_trace_recorder.user.js` 脚本
+2. 安装 `src/batchexecute_trace_recorder.user.js` 脚本
 3. 根据需要修改脚本中的 `@match` 规则以匹配目标网站
 4. 访问目标网站，脚本会自动加载
 5. 使用右下角的控制面板进行操作
@@ -139,16 +142,55 @@ const shouldRecord = (u, method, parsedBody) => {
 - 通过事件监听器捕获用户点击行为
 - 使用时间窗口算法关联点击事件与网络请求
 
+## 项目结构
+
+```
+web-request-tracer/
+├── docs/                                       # 文档目录
+│   ├── API.md                                 # API 文档
+│   └── USAGE.md                               # 使用指南
+├── src/                                        # 源代码目录
+│   ├── batchexecute_trace_recorder.js         # 控制台版本
+│   └── batchexecute_trace_recorder.user.js    # 用户脚本版本
+├── .gitignore                                  # Git 忽略文件
+├── CHANGELOG.md                                # 更新日志
+├── LICENSE                                     # MIT 许可证
+└── README.md                                   # 项目说明文档
+```
+
+## 文档
+
+- [快速开始](docs/QUICKSTART.md) - 5 分钟上手指南
+- [使用指南](docs/USAGE.md) - 详细的使用说明和配置指南
+- [API 文档](docs/API.md) - 完整的 API 参考文档
+
+## 更新日志
+
+查看 [CHANGELOG.md](CHANGELOG.md) 了解版本更新历史。
+
 ## 许可证
 
-MIT
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request！
+
+贡献指南：
+1. Fork 本仓库
+2. 创建你的特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交你的改动 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启一个 Pull Request
 
 ## 相关项目
 
 - [Fiddler](https://www.telerik.com/fiddler) - 功能强大的 HTTP 调试代理
 - [Charles](https://www.charlesproxy.com/) - 跨平台 HTTP 代理工具
 - [Chrome DevTools](https://developer.chrome.com/docs/devtools/) - 浏览器内置开发者工具
+
+## 联系方式
+
+如有问题或建议，欢迎通过以下方式联系：
+- 提交 [Issue](https://github.com/yourusername/web-request-tracer/issues)
+- 发送邮件至：your.email@example.com
