@@ -196,21 +196,28 @@ if %HAS_STAGED_CHANGES% equ 1 (
 )
 
 REM 检查是否有未推送的提交
-git rev-parse @{u} >nul 2>&1
-if errorlevel 1 (
+set HAS_UNPUSHED=0
+if %HAS_STAGED_CHANGES% equ 1 (
     set HAS_UNPUSHED=1
-    echo [提示] 检测到本地有提交但远程分支不存在，需要推送
 ) else (
-    git diff --quiet @{u} @
+    REM 检查远程分支是否存在
+    git rev-parse --verify origin/%DEFAULT_BRANCH% >nul 2>&1
     if errorlevel 1 (
-        set HAS_UNPUSHED=1
-        echo [提示] 检测到本地有未推送的提交
+        REM 远程分支不存在，检查本地是否有提交
+        git rev-parse HEAD >nul 2>&1
+        if not errorlevel 1 (
+            set HAS_UNPUSHED=1
+            echo [提示] 检测到本地有提交但远程分支不存在，需要推送
+        )
     ) else (
-        set HAS_UNPUSHED=0
+        REM 远程分支存在，比较本地和远程
+        git diff --quiet origin/%DEFAULT_BRANCH% HEAD 2>nul
+        if errorlevel 1 (
+            set HAS_UNPUSHED=1
+            echo [提示] 检测到本地有未推送的提交
+        )
     )
 )
-
-if %HAS_STAGED_CHANGES% equ 1 set HAS_UNPUSHED=1
 
 if !HAS_UNPUSHED! equ 1 (
     REM 检测当前分支
