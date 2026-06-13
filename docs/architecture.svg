@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 580">
+<defs>
+<marker id="arrowhead-334155" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 8 3, 0 6" fill="#334155"/>
+</marker>
+<marker id="arrowhead-60a5fa" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 8 3, 0 6" fill="#60a5fa"/>
+</marker>
+<marker id="arrowhead-a78bfa" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 8 3, 0 6" fill="#a78bfa"/>
+</marker>
+<marker id="arrowhead-22d3ee" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 8 3, 0 6" fill="#22d3ee"/>
+</marker>
+<marker id="arrowhead-f59e0b" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 8 3, 0 6" fill="#f59e0b"/>
+</marker>
+<marker id="arrowhead-34d399" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 8 3, 0 6" fill="#34d399"/>
+</marker>
+</defs>
+<rect width="800" height="580" fill="#080c10" rx="12"/>
+<text x="400" y="38" font-family="Outfit,Inter,system-ui,sans-serif" font-size="20" fill="#e2e8f0" text-anchor="middle" font-weight="bold" class="">Web Request Tracer — Architecture</text>
+<text x="30" y="78" font-family="Outfit,Inter,system-ui,sans-serif" font-size="14" fill="#64748b" text-anchor="start" font-weight="bold" class="">Capture Layers</text>
+<rect x="30" y="90" width="230" height="140" rx="8" fill="#0f1722" stroke="#60a5fa" stroke-width="1.5"/>
+<rect x="30" y="90" width="230" height="32" rx="8" fill="rgba(96,165,250,0.10)" stroke="#60a5fa" stroke-width="1.5"/>
+<text x="42" y="112" font-family="Outfit,Inter,system-ui,sans-serif" font-size="13" fill="#60a5fa" text-anchor="start" font-weight="bold" class="">XMLHttpRequest</text>
+<text x="44" y="142" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">open / send / abort</text>
+<text x="44" y="162" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">getAllResponseHeaders()</text>
+<text x="44" y="182" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">readyState → done</text>
+<text x="44" y="202" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">status / body capture</text>
+<rect x="285" y="90" width="230" height="140" rx="8" fill="#0f1722" stroke="#a78bfa" stroke-width="1.5"/>
+<rect x="285" y="90" width="230" height="32" rx="8" fill="rgba(167,139,250,0.10)" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="297" y="112" font-family="Outfit,Inter,system-ui,sans-serif" font-size="13" fill="#a78bfa" text-anchor="start" font-weight="bold" class="">fetch API</text>
+<text x="299" y="142" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">window.fetch wrapper</text>
+<text x="299" y="162" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">res.headers (Map→obj)</text>
+<text x="299" y="182" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">res.clone().text() body</text>
+<text x="299" y="202" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">fetch(Request) support</text>
+<rect x="540" y="90" width="230" height="140" rx="8" fill="#0f1722" stroke="#22d3ee" stroke-width="1.5"/>
+<rect x="540" y="90" width="230" height="32" rx="8" fill="rgba(34,211,238,0.10)" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="552" y="112" font-family="Outfit,Inter,system-ui,sans-serif" font-size="13" fill="#22d3ee" text-anchor="start" font-weight="bold" class="">WebSocket</text>
+<text x="554" y="142" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">constructor wrapper</text>
+<text x="554" y="162" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">onopen/onmessage/onclose</text>
+<text x="554" y="182" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">addEventListener hook</text>
+<text x="554" y="202" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">Blob/ArrayBuffer metadata</text>
+<line x1="400" y1="230" x2="400" y2="275" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowhead-334155)"/>
+<text x="30" y="290" font-family="Outfit,Inter,system-ui,sans-serif" font-size="14" fill="#64748b" text-anchor="start" font-weight="bold" class="">Processing Pipeline</text>
+<rect x="30" y="300" width="365" height="100" rx="8" fill="#0f1722" stroke="#f59e0b" stroke-width="1.5"/>
+<rect x="30" y="300" width="365" height="32" rx="8" fill="rgba(245,158,11,0.10)" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="42" y="322" font-family="Outfit,Inter,system-ui,sans-serif" font-size="13" fill="#f59e0b" text-anchor="start" font-weight="bold" class="">Filter Engine</text>
+<text x="44" y="348" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">host / hostPattern</text>
+<text x="220" y="348" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">method whitelist</text>
+<text x="44" y="368" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">pathContains / pathPattern</text>
+<text x="220" y="368" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">req/res header filters</text>
+<text x="44" y="388" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">regex cache (avoid recompile)</text>
+<rect x="415" y="300" width="355" height="100" rx="8" fill="#0f1722" stroke="#34d399" stroke-width="1.5"/>
+<rect x="415" y="300" width="355" height="32" rx="8" fill="rgba(52,211,153,0.10)" stroke="#34d399" stroke-width="1.5"/>
+<text x="427" y="322" font-family="Outfit,Inter,system-ui,sans-serif" font-size="13" fill="#34d399" text-anchor="start" font-weight="bold" class="">Click Tracker</text>
+<text x="429" y="352" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">document click listener</text>
+<text x="429" y="372" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">time-window association (3s default)</text>
+<text x="429" y="388" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">pruning → maxEvents cap</text>
+<line x1="212" y1="400" x2="212" y2="450" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowhead-334155)"/>
+<line x1="592" y1="400" x2="592" y2="450" stroke="#334155" stroke-width="1.5" marker-end="url(#arrowhead-334155)"/>
+<rect x="30" y="445" width="365" height="70" rx="8" fill="#0f1722" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="42" y="467" font-family="Outfit,Inter,system-ui,sans-serif" font-size="13" fill="#e2e8f0" text-anchor="start" font-weight="bold" class="">Event Store</text>
+<text x="44" y="487" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">in-memory array + localStorage persistence</text>
+<text x="44" y="505" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">cross-page survive on same origin</text>
+<rect x="415" y="445" width="355" height="70" rx="8" fill="#0f1722" stroke="#34d399" stroke-width="1.5"/>
+<text x="427" y="467" font-family="Outfit,Inter,system-ui,sans-serif" font-size="13" fill="#34d399" text-anchor="start" font-weight="bold" class="">Dual Export</text>
+<text x="429" y="487" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">JSON: meta + events + transactions + state</text>
+<text x="429" y="505" font-family="Outfit,Inter,system-ui,sans-serif" font-size="12" fill="#64748b" text-anchor="start" font-weight="normal" class="">HAR 1.2: Chrome DevTools / Charles / Fiddler</text>
+<text x="400" y="560" font-family="Outfit,Inter,system-ui,sans-serif" font-size="11" fill="#64748b" text-anchor="middle" font-weight="normal" class="">v0.4.0  ·  MIT License  ·  github.com/LPK3215/web-request-tracer</text>
+</svg>

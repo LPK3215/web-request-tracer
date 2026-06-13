@@ -3,7 +3,14 @@
 A universal browser network request tracing tool. Hook XHR/fetch/WebSocket requests, capture and analyze them, then export as JSON or HAR. Ideal for API reverse engineering, debugging, and performance profiling.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](https://github.com/web-request-tracer/web-request-tracer)
+[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](https://github.com/LPK3215/web-request-tracer)
+[![JavaScript](https://img.shields.io/badge/language-JavaScript-F7DF1E.svg?logo=javascript)](https://github.com/LPK3215/web-request-tracer)
+[![Tampermonkey](https://img.shields.io/badge/Userscript-Tampermonkey-00485B.svg?logo=tampermonkey)](https://www.tampermonkey.net/)
+[![Tests](https://img.shields.io/badge/tests-21%2F21%20pass-brightgreen.svg)](https://github.com/LPK3215/web-request-tracer/blob/main/test/test-report.md)
+
+## Architecture
+
+![Architecture](./docs/architecture.svg)
 
 ## Features
 
@@ -185,10 +192,14 @@ Binary data (Blob, ArrayBuffer) is recorded with type and size metadata rather t
 web-request-tracer/
 ├── trace-recorder.js        # Console version (paste into DevTools)
 ├── trace-recorder.user.js   # UserScript version (install via Tampermonkey)
+├── docs/
+│   ├── architecture.svg     # Architecture diagram
+│   └── scripts/
+│       └── generate_architecture.py  # SVG generation script
 ├── test/
 │   ├── index.html           # Test page with buttons for all features
 │   ├── test-server.py       # Local HTTP + WebSocket test server
-│   └── test-report.md       # Test report (v0.4.0 verification)
+│   └── test-report.md       # Test report (v0.4.0 verification, 21/21 pass)
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -209,6 +220,8 @@ python test/test-server.py
 
 Then open `http://localhost:8765/` in your browser. The test page provides buttons for XHR, fetch, WebSocket, and filter testing. You can inject `trace-recorder.js` via the DevTools console or load it from `http://localhost:8765/trace-recorder.js`.
 
+See [test/test-report.md](./test/test-report.md) for the full test report (21/21 pass, v0.4.0).
+
 ## Notes
 
 - This tool reads and records network request content — be mindful of data security and privacy
@@ -219,31 +232,11 @@ Then open `http://localhost:8765/` in your browser. The test page provides butto
 
 ## Changelog
 
-### v0.4.0
-- Fixed JSON request body being misparsed as URL-encoded parameters
-- Added `fetch(Request)` object support (method, headers now extracted correctly)
-- Added XHR `abort` event recording (previously silently dropped)
-- Added WebSocket property-based event handler interception (`ws.onopen = ...` now recorded)
-- Added regex pattern caching to avoid recompilation on every request
-- Added transaction pruning to prevent unbounded localStorage growth
-- Removed unused variables and parameters
-- Included test server and test page in the repository
-
-### v0.3.0
-- Added response headers recording (XHR via `getAllResponseHeaders()`, fetch via `res.headers`)
-- Added dynamic filter settings modal (click "Filters" on panel to configure rules in-page)
-- Added regex filter support (`hostPattern`, `pathPattern`)
-- Added request/response header filters
-- Added HAR format export
-- Added WebSocket support (open/send/receive/close/error events)
-- Filters now persist across page navigations via localStorage state
-
-### v0.2.0
-- Initial public release with XHR/fetch hooks, click transactions, JSON export, cross-page persistence
+See [CHANGELOG.md](./CHANGELOG.md) for the full version history (v0.2.0 through v0.4.0).
 
 ## License
 
-MIT
+MIT License — see [LICENSE](./LICENSE) for details.
 
 ## Related Projects
 
