@@ -1,196 +1,221 @@
 # Web Request Tracer
 
-一个通用的浏览器网络请求追踪工具，支持 XHR/fetch 请求的捕获、分析和导出。可用于 API 逆向工程、调试、性能分析等场景。
+A universal browser network request tracing tool. Hook XHR/fetch/WebSocket requests, capture and analyze them, then export as JSON or HAR. Ideal for API reverse engineering, debugging, and performance profiling.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/yourusername/web-request-tracer)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/web-request-tracer/web-request-tracer)
 
-## 功能特性
+## Features
 
-- 🎯 **灵活的采集模式**
-  - `minimal`: 自定义过滤规则，仅采集特定请求（减少数据量）
-  - `all`: 采集全部 XHR/fetch 请求（通用抓包模式）
+- **Multiple capture sources** — XHR, fetch, and WebSocket (open, send, receive, close, error events)
+- **Response headers recording** — automatically captures response headers from both XHR and fetch
+- **Flexible capture modes**
+  - `All` — capture every XHR/fetch/WebSocket event (universal, bigger data)
+  - `Filtered` — only capture requests matching your filter rules
+- **Advanced filter rules**
+  - Hostname exact match or regex (`hostPattern`)
+  - Path substring or regex (`pathPattern`)
+  - HTTP method whitelist
+  - Request header key-value match (e.g., `content-type: application/json`)
+  - Response header key-value match
+- **In-panel filter settings** — click "Filters" to configure rules without editing source code
+- **Dual export** — JSON (full trace data) and HAR (Chrome DevTools / Charles / Fiddler compatible)
+- **Cross-page persistence** — records survive page navigations on the same origin via localStorage
+- **Click-to-request association** — automatically link user clicks with resulting network requests via a configurable time window
 
-- 💾 **跨页面持久化**: 支持同一站点跨页面继续累积记录
+## Use Cases
 
-- 🖱️ **点击事务追踪**: 自动关联用户点击操作与网络请求，便于分析用户行为触发的 API 调用
+- API reverse engineering and analysis
+- Frontend performance debugging
+- User behavior to network request correlation
+- Automated testing data collection
+- Web application security auditing
+- WebSocket protocol analysis
 
-- 📥 **JSON 导出**: 一键导出完整的追踪数据，包含请求/响应详情
+## Quick Start
 
-- 🔧 **易于定制**: 可根据目标网站自定义过滤规则和采集策略
+### Console version (handy for one-off tracing)
 
-## 使用场景
+1. Open the target website
+2. Open DevTools Console (F12)
+3. Paste the contents of `trace-recorder.js` and press Enter
+4. Click "Start" on the floating panel (bottom-right)
+5. Perform the actions you want to trace
+6. Click "JSON" or "HAR" to export the data
 
-- API 逆向工程和分析
-- 前端性能调试
-- 用户行为与网络请求关联分析
-- 自动化测试数据收集
-- Web 应用安全审计
+### UserScript version (install once, run forever)
 
-## 快速开始
+1. Install [Tampermonkey](https://www.tampermonkey.net/) (or a compatible userscript manager)
+2. Install `trace-recorder.user.js`
+3. (Optional) Edit the `@match` rules to limit which sites the script runs on
+4. Visit any target website — the script loads automatically
+5. Use the floating control panel in the bottom-right corner
 
-### 方式一：控制台版本（推荐用于临时测试）
+## Control Panel
 
-适合临时使用或快速测试：
+| Button | Action |
+|---|---|
+| **Start / Stop** | Toggle recording on/off |
+| **Mode: All / Filtered** | Switch between capture all requests or filtered mode |
+| **Filters** | Open settings modal to configure filter rules dynamically |
+| **JSON** | Export trace data as a JSON file |
+| **HAR** | Export trace data in HAR format (Chrome DevTools compatible) |
+| **Clear** | Discard all recorded events |
 
-1. 打开目标网站
-2. 打开浏览器 DevTools Console（F12）
-3. 复制粘贴 `src/batchexecute_trace_recorder.js` 的内容并回车
-4. 点击右下角面板的 "Start" 按钮开始记录
-5. 执行需要追踪的操作
-6. 点击 "Download JSON" 导出数据
+## Configuration
 
-### 方式二：用户脚本版本（推荐用于长期使用）
-
-适合长期使用或自动化场景：
-
-1. 安装 [Tampermonkey](https://www.tampermonkey.net/) 或其他用户脚本管理器
-2. 安装 `src/batchexecute_trace_recorder.user.js` 脚本
-3. 根据需要修改脚本中的 `@match` 规则以匹配目标网站
-4. 访问目标网站，脚本会自动加载
-5. 使用右下角的控制面板进行操作
-
-## 示例：Gemini Business API 追踪
-
-本工具默认配置为追踪 Gemini Business 的 batchexecute API，作为使用示例：
-
-1. 打开 [Gemini Business Team 设置页面](https://business.gemini.google/settings/team)
-2. 按照上述方式加载脚本
-3. 执行团队管理操作（list / add / remove / update）
-4. 导出数据分析 API 调用
-
-## 控制面板
-
-- **Start/Stop**: 开始/停止记录
-- **Mode**: 切换采集模式（mini/max）
-- **Download JSON**: 导出追踪数据
-- **Clear**: 清除当前记录
-
-## 自定义配置
-
-### 基础配置
-
-在脚本中修改 `CFG` 对象来自定义行为：
+Edit the `CFG` object at the top of either script to customize default behaviour:
 
 ```javascript
 const CFG = {
-  captureMode: "minimal",           // 采集模式: "minimal" 或 "all"
-  enableClickTransaction: true,     // 启用点击事务追踪
-  transactionWindowMs: 3000,        // 事务窗口时间（毫秒）
-  readResponseBody: true,           // 读取响应体
-  maxResponseTextLen: 200000,       // 最大响应文本长度
-  persist: true,                    // 启用持久化
-  maxEvents: 1200,                  // 最大事件数量
+  captureMode: "all",               // "all" | "filtered"
+  filters: {
+    hosts: [],                      // e.g. ["api.example.com"]
+    hostPattern: "",                // hostname regex, e.g. "api\\..*\\.com"
+    pathContains: [],               // e.g. ["/api/"]
+    pathPattern: "",                // path regex, e.g. "/api/v[0-9]+/.*"
+    methods: [],                    // e.g. ["POST", "GET"]
+    requestHeaders: {},             // e.g. {"content-type": "application/json"}
+    responseHeaders: {},            // e.g. {"content-type": "application/json"}
+  },
+  enableClickTransaction: true,     // associate clicks with network requests
+  transactionWindowMs: 3000,        // time window for click→request association (ms)
+  readResponseBody: true,           // read and record response bodies
+  maxResponseTextLen: 200000,       // max response text length before truncation
+  persist: true,                    // enable cross-page persistence
+  maxEvents: 1200,                  // maximum number of recorded events
 };
 ```
 
-### 自定义过滤规则（minimal 模式）
+## Filter Rules
 
-修改 `shouldRecord` 函数来定义你自己的过滤规则：
+### Filter dimensions
 
-```javascript
-const shouldRecord = (u, method, parsedBody) => {
-  if (!u || u.error) return false;
-  if (CFG.captureMode === "all") return true;
+In filtered mode, only requests that pass ALL non-empty filters are recorded. Leave a filter empty to skip it.
 
-  // 示例 1: 只记录特定域名的请求
-  if (u.host === "api.example.com") return true;
+| Filter | Type | Description |
+|---|---|---|
+| `hosts` | exact array | Request host must be in this list |
+| `hostPattern` | regex string | Request host must match this regex |
+| `pathContains` | substring array | Request path must contain at least one of these strings |
+| `pathPattern` | regex string | Request path must match this regex |
+| `methods` | exact array | Request method must be in this list |
+| `requestHeaders` | key-value object | Request headers must match these key-value pairs |
+| `responseHeaders` | key-value object | Response headers must match these key-value pairs (post-response check) |
 
-  // 示例 2: 只记录特定路径的请求
-  if (u.pathname.includes("/api/v1/")) return true;
+### Examples
 
-  // 示例 3: 只记录 POST 请求
-  if (method === "POST") return true;
-
-  // 示例 4: 根据请求体内容过滤
-  if (parsedBody?.value?.action === "getData") return true;
-
-  return false;
-};
-```
-
-### 用户脚本匹配规则
-
-修改 `@match` 来指定脚本运行的网站：
+Only capture POST requests to `api.example.com` whose path contains `/v1/`:
 
 ```javascript
-// @match        https://example.com/*           // 匹配特定域名
-// @match        https://*.example.com/*         // 匹配所有子域名
-// @match        *://*/*                         // 匹配所有网站（默认）
+filters: {
+  hosts: ["api.example.com"],
+  pathContains: ["/v1/"],
+  methods: ["POST"],
+}
 ```
 
-## 导出数据格式
+Only capture JSON API calls (filter out images and static assets):
 
-导出的 JSON 文件包含：
+```javascript
+filters: {
+  requestHeaders: { "content-type": "application/json" },
+}
+```
 
-- `meta`: 元数据（开始时间、用户代理、URL 等）
-- `events`: 事件列表（网络请求、点击事件等）
-- `transactions`: 事务映射（点击与网络请求的关联）
-- `state`: 当前状态（运行状态、采集模式）
+Use regex to capture any API subdomain:
 
-## 注意事项
+```javascript
+filters: {
+  hostPattern: "api\\..*\\.com",
+  pathPattern: "/v[0-9]+/.*",
+}
+```
 
-- 本工具会读取和记录网络请求的内容，请注意数据安全和隐私保护
-- 在生产环境使用时，建议使用 `minimal` 模式并配置严格的过滤规则
-- 导出的 JSON 文件可能包含敏感信息，请妥善保管
-- 某些网站可能有 CSP（内容安全策略）限制，可能影响脚本运行
+### Dynamic configuration
 
-## 技术原理
+Click the **Filters** button on the control panel to bring up a settings modal where you can edit all filter rules without touching the source code. Changes take effect immediately and persist across page navigations.
 
-- 通过 Hook `XMLHttpRequest` 和 `fetch` API 拦截网络请求
-- 使用 `localStorage` 实现跨页面数据持久化
-- 通过事件监听器捕获用户点击行为
-- 使用时间窗口算法关联点击事件与网络请求
+## Export Formats
 
-## 项目结构
+### JSON
+
+The exported JSON file contains:
+
+- `meta` — metadata (start time, user agent, URL, timezone, etc.)
+- `events` — event list (network requests with full request/response details including response headers, click events, WebSocket events)
+- `transactions` — transaction mapping (clicks linked to network requests)
+- `state` — current state (running status, capture mode)
+
+### HAR (HTTP Archive)
+
+HAR export follows the [HAR 1.2 specification](http://www.softwareishard.com/blog/har-12-spec/). Compatible with:
+
+- Chrome DevTools (Network panel → Import HAR)
+- Charles Proxy
+- Fiddler
+- Firefox Developer Tools
+- Various HAR viewer tools
+
+The HAR file includes request/response headers, query parameters, post data, timing information, and response body text.
+
+## WebSocket Events
+
+WebSocket recording captures these event types:
+
+- `open` — connection established (URL, connection ID)
+- `send` — outgoing message (data, auto-detects JSON)
+- `receive` — incoming message (data, auto-detects JSON)
+- `close` — connection closed (code, reason, duration)
+- `error` — connection error
+
+Binary data (Blob, ArrayBuffer) is recorded with type and size metadata rather than raw bytes.
+
+## How It Works
+
+- Hooks `XMLHttpRequest` and `fetch` APIs to intercept network requests
+- Wraps `WebSocket` constructor to intercept WebSocket connections and messages
+- Uses `localStorage` for cross-page data persistence
+- Listens to click events to track user interactions
+- Uses a time-window algorithm to associate clicks with network requests
+
+## Project Structure
 
 ```
 web-request-tracer/
-├── docs/                                       # 文档目录
-│   ├── API.md                                 # API 文档
-│   └── USAGE.md                               # 使用指南
-├── src/                                        # 源代码目录
-│   ├── batchexecute_trace_recorder.js         # 控制台版本
-│   └── batchexecute_trace_recorder.user.js    # 用户脚本版本
-├── .gitignore                                  # Git 忽略文件
-├── CHANGELOG.md                                # 更新日志
-├── LICENSE                                     # MIT 许可证
-└── README.md                                   # 项目说明文档
+├── trace-recorder.js        # Console version (paste into DevTools)
+├── trace-recorder.user.js   # UserScript version (install via Tampermonkey)
+└── README.md
 ```
 
-## 文档
+## Notes
 
-- [快速开始](docs/QUICKSTART.md) - 5 分钟上手指南
-- [使用指南](docs/USAGE.md) - 详细的使用说明和配置指南
-- [API 文档](docs/API.md) - 完整的 API 参考文档
+- This tool reads and records network request content — be mindful of data security and privacy
+- For production use, prefer filtered mode with strict filter rules
+- Exported JSON/HAR files may contain sensitive information — handle with care
+- Some websites may have CSP (Content Security Policy) restrictions that interfere with script execution
+- The UserScript version uses `@inject-into page` to ensure hooks work within page context
 
-## 更新日志
+## Changelog
 
-查看 [CHANGELOG.md](CHANGELOG.md) 了解版本更新历史。
+### v0.3.0
+- Added response headers recording (XHR via `getAllResponseHeaders()`, fetch via `res.headers`)
+- Added dynamic filter settings modal (click "Filters" on panel to configure rules in-page)
+- Added regex filter support (`hostPattern`, `pathPattern`)
+- Added request/response header filters
+- Added HAR format export
+- Added WebSocket support (open/send/receive/close/error events)
+- Filters now persist across page navigations via localStorage state
 
-## 许可证
+### v0.2.0
+- Initial public release with XHR/fetch hooks, click transactions, JSON export, cross-page persistence
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+## License
 
-## 贡献
+MIT
 
-欢迎提交 Issue 和 Pull Request！
+## Related Projects
 
-贡献指南：
-1. Fork 本仓库
-2. 创建你的特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交你的改动 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启一个 Pull Request
-
-## 相关项目
-
-- [Fiddler](https://www.telerik.com/fiddler) - 功能强大的 HTTP 调试代理
-- [Charles](https://www.charlesproxy.com/) - 跨平台 HTTP 代理工具
-- [Chrome DevTools](https://developer.chrome.com/docs/devtools/) - 浏览器内置开发者工具
-
-## 联系方式
-
-如有问题或建议，欢迎通过以下方式联系：
-- 提交 [Issue](https://github.com/yourusername/web-request-tracer/issues)
-- 发送邮件至：your.email@example.com
+- [Fiddler](https://www.telerik.com/fiddler) — powerful HTTP debugging proxy
+- [Charles](https://www.charlesproxy.com/) — cross-platform HTTP proxy tool
+- [Chrome DevTools](https://developer.chrome.com/docs/devtools/) — built-in browser developer tools
