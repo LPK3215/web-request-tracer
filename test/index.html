@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Web Request Tracer - Test Page</title>
+<style>
+body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+h1 { color: #333; }
+.section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+.section h3 { margin-top: 0; }
+button { margin: 5px; padding: 8px 16px; cursor: pointer; border: 1px solid #999; border-radius: 4px; background: #f0f0f0; }
+button:hover { background: #e0e0e0; }
+pre { background: #1a1a1a; color: #0f0; padding: 10px; border-radius: 4px; max-height: 200px; overflow-y: auto; font-size: 12px; }
+#log { max-height: 300px; }
+</style>
+</head>
+<body>
+<h1>Web Request Tracer - Test Page</h1>
+<p>This page contains test scenarios for all WRT features.</p>
+
+<div class="section">
+<h3>XHR Tests</h3>
+<button onclick="testXHR_GET()">XHR GET /api/test-xhr</button>
+<button onclick="testXHR_POST()">XHR POST /api/test-post</button>
+<button onclick="testXHR_CustomHeader()">XHR with Custom Header</button>
+</div>
+
+<div class="section">
+<h3>Fetch Tests</h3>
+<button onclick="testFetch_GET()">Fetch GET /api/test-get</button>
+<button onclick="testFetch_POST()">Fetch POST /api/test-post</button>
+<button onclick="testFetch_Text()">Fetch /api/text-response</button>
+</div>
+
+<div class="section">
+<h3>WebSocket Tests</h3>
+<button onclick="testWS_Connect()">Connect WebSocket</button>
+<button onclick="testWS_Send()">Send WS Message</button>
+<button onclick="testWS_Close()">Close WS</button>
+<span id="ws-status" style="color: #888; margin-left: 10px;">Disconnected</span>
+</div>
+
+<div class="section">
+<h3>Filter Tests</h3>
+<button onclick="testFilter_API()">Fetch /api/filter-test</button>
+<button onclick="testFilter_Slow()">Fetch /api/slow (500ms delay)</button>
+</div>
+
+<div class="section">
+<h3>Events Log</h3>
+<pre id="log"></pre>
+</div>
+
+<script>
+// ── XHR Tests ──
+function testXHR_GET() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/api/test-xhr");
+    xhr.setRequestHeader("X-Test-Header", "xhr-get-test");
+    xhr.onload = function() { log("XHR GET: " + xhr.status + " - " + xhr.responseText.slice(0, 100)); };
+    xhr.send();
+}
+
+function testXHR_POST() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/test-post");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onload = function() { log("XHR POST: " + xhr.status + " - " + xhr.responseText.slice(0, 100)); };
+    xhr.send(JSON.stringify({ name: "test", value: 42 }));
+}
+
+function testXHR_CustomHeader() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/api/test-get");
+    xhr.setRequestHeader("X-Custom-Client", "wrt-test-suite");
+    xhr.onload = function() { log("XHR Custom Header: " + xhr.status + " - " + xhr.responseText.slice(0, 100)); };
+    xhr.send();
+}
+
+// ── Fetch Tests ──
+function testFetch_GET() {
+    fetch("/api/test-get")
+        .then(r => r.json())
+        .then(d => log("Fetch GET: " + JSON.stringify(d).slice(0, 100)));
+}
+
+function testFetch_POST() {
+    fetch("/api/test-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create", id: 999 })
+    }).then(r => r.json()).then(d => log("Fetch POST: " + JSON.stringify(d).slice(0, 100)));
+}
+
+function testFetch_Text() {
+    fetch("/api/text-response")
+        .then(r => r.text())
+        .then(d => log("Fetch Text: " + d));
+}
+
+// ── WebSocket Tests ──
+var ws = null;
+function testWS_Connect() {
+    if (ws) { log("WS already connected"); return; }
+    ws = new WebSocket("ws://localhost:8766");
+    ws.onopen = function() {
+        document.getElementById("ws-status").textContent = "Connected";
+        document.getElementById("ws-status").style.color = "green";
+        log("WS: Connected");
+    };
+    ws.onmessage = function(e) { log("WS Receive: " + e.data.slice(0, 100)); };
+    ws.onclose = function(e) {
+        document.getElementById("ws-status").textContent = "Disconnected (code: " + e.code + ")";
+        document.getElementById("ws-status").style.color = "red";
+        ws = null;
+        log("WS: Closed (code=" + e.code + ", reason=" + e.reason + ")");
+    };
+    ws.onerror = function(e) { log("WS: Error"); };
+}
+
+function testWS_Send() {
+    if (!ws) { log("WS not connected!"); return; }
+    var msg = JSON.stringify({ type: "ping", ts: Date.now(), data: "hello" });
+    ws.send(msg);
+    log("WS Send: " + msg.slice(0, 100));
+}
+
+function testWS_Close() {
+    if (!ws) { log("WS not connected!"); return; }
+    ws.close(1000, "Normal closure");
+}
+
+// ── Filter Tests ──
+function testFilter_API() {
+    fetch("/api/filter-test")
+        .then(r => r.json())
+        .then(d => log("Filter Test: " + JSON.stringify(d)));
+}
+
+function testFilter_Slow() {
+    var start = Date.now();
+    fetch("/api/slow")
+        .then(r => r.json())
+        .then(d => log("Slow API: " + JSON.stringify(d) + " (took " + (Date.now() - start) + "ms)"));
+}
+
+// ── Logger ──
+function log(msg) {
+    var el = document.getElementById("log");
+    el.textContent += "[" + new Date().toISOString().slice(11, 23) + "] " + msg + "\n";
+    el.scrollTop = el.scrollHeight;
+}
+</script>
+</body>
+</html>

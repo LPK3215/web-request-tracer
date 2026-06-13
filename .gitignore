@@ -3,9 +3,6 @@
 .playwright-cli/
 *.yml
 
-# Test infrastructure (local dev only, not for distribution)
-test/
-
 # Python
 __pycache__/
 *.pyc

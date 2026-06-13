@@ -3,7 +3,7 @@
 A universal browser network request tracing tool. Hook XHR/fetch/WebSocket requests, capture and analyze them, then export as JSON or HAR. Ideal for API reverse engineering, debugging, and performance profiling.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/web-request-tracer/web-request-tracer)
+[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](https://github.com/web-request-tracer/web-request-tracer)
 
 ## Features
 
@@ -185,8 +185,25 @@ Binary data (Blob, ArrayBuffer) is recorded with type and size metadata rather t
 web-request-tracer/
 ├── trace-recorder.js        # Console version (paste into DevTools)
 ├── trace-recorder.user.js   # UserScript version (install via Tampermonkey)
+├── test/
+│   ├── index.html           # Test page with buttons for all features
+│   └── test-server.py       # Local HTTP + WebSocket test server
 └── README.md
 ```
+
+## Testing
+
+A local test environment is included in the `test/` directory:
+
+```bash
+# Install the only external dependency
+pip install websockets
+
+# Start the test server
+python test/test-server.py
+```
+
+Then open `http://localhost:8765/` in your browser. The test page provides buttons for XHR, fetch, WebSocket, and filter testing. You can inject `trace-recorder.js` via the DevTools console or load it from `http://localhost:8765/trace-recorder.js`.
 
 ## Notes
 
@@ -197,6 +214,16 @@ web-request-tracer/
 - The UserScript version uses `@inject-into page` to ensure hooks work within page context
 
 ## Changelog
+
+### v0.4.0
+- Fixed JSON request body being misparsed as URL-encoded parameters
+- Added `fetch(Request)` object support (method, headers now extracted correctly)
+- Added XHR `abort` event recording (previously silently dropped)
+- Added WebSocket property-based event handler interception (`ws.onopen = ...` now recorded)
+- Added regex pattern caching to avoid recompilation on every request
+- Added transaction pruning to prevent unbounded localStorage growth
+- Removed unused variables and parameters
+- Included test server and test page in the repository
 
 ### v0.3.0
 - Added response headers recording (XHR via `getAllResponseHeaders()`, fetch via `res.headers`)

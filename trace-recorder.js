@@ -1,5 +1,5 @@
 /**
- * Web Request Tracer – Console version (v0.3.0)
+ * Web Request Tracer – Console version (v0.4.0)
  * Paste into DevTools Console (F12) and press Enter.
  *
  * Features:
@@ -69,6 +69,14 @@
 
   const RUN = { enabled: false, hooksInstalled: false, wsHooksInstalled: false };
 
+  const _regexCache = {};
+  const _getRegex = (pattern) => {
+    if (!_regexCache[pattern]) {
+      try { _regexCache[pattern] = new RegExp(pattern); } catch (e) { _regexCache[pattern] = null; }
+    }
+    return _regexCache[pattern];
+  };
+
   const TX = { currentId: null, lastClickAt: 0 };
   const newTxId = () => `tx_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   const getActiveTxId = () => {
@@ -111,7 +119,7 @@
       const u = new URL(rawUrl, location.href);
       const query = {};
       for (const [k, v] of u.searchParams.entries()) query[k] = v;
-      return { href: u.href, origin: u.origin, host: u.host, pathname: u.pathname, query };
+      return { href: u.href, host: u.host, pathname: u.pathname, query };
     } catch (e) {
       return { href: String(rawUrl), error: String(e) };
     }
@@ -120,6 +128,10 @@
   const parseBody = (body) => {
     if (body == null) return { type: "empty", value: null };
     if (typeof body === "string") {
+      var _trimmed = body.trimStart();
+      if (_trimmed[0] === '{' || _trimmed[0] === '[' || _trimmed[0] === '<') {
+        return { type: "text", value: body };
+      }
       try {
         const usp = new URLSearchParams(body);
         const o = {};
@@ -176,7 +188,8 @@
     }
     if (f.hostPattern && typeof f.hostPattern === "string" && f.hostPattern.trim()) {
       try {
-        if (!u.host || !new RegExp(f.hostPattern).test(u.host)) return false;
+        var _hostRe = _getRegex(f.hostPattern);
+        if (!_hostRe || !u.host || !_hostRe.test(u.host)) return false;
       } catch { return false; }
     }
     if (Array.isArray(f.pathContains) && f.pathContains.length > 0) {
@@ -185,7 +198,8 @@
     }
     if (f.pathPattern && typeof f.pathPattern === "string" && f.pathPattern.trim()) {
       try {
-        if (!u.pathname || !new RegExp(f.pathPattern).test(u.pathname)) return false;
+        var _pathRe = _getRegex(f.pathPattern);
+        if (!_pathRe || !u.pathname || !_pathRe.test(u.pathname)) return false;
       } catch { return false; }
     }
     if (Array.isArray(f.methods) && f.methods.length > 0) {
@@ -230,7 +244,7 @@
     return filterMatch(u, method, reqHeaders);
   };
 
-  const buildRecordedBody = (u, parsedBody) => {
+  const buildRecordedBody = (parsedBody) => {
     return { type: parsedBody.type, value: parsedBody.value };
   };
 
@@ -262,6 +276,13 @@
     TRACE.events.push(ev);
     if (CFG.maxEvents && TRACE.events.length > CFG.maxEvents) {
       TRACE.events.splice(0, TRACE.events.length - CFG.maxEvents);
+    }
+    // Prune transactions (keep last maxEvents worth)
+    var txKeys = Object.keys(TRACE.transactions);
+    if (txKeys.length > CFG.maxEvents) {
+      txKeys.sort();
+      var toRemove = txKeys.slice(0, txKeys.length - CFG.maxEvents);
+      for (var ti = 0; ti < toRemove.length; ti++) delete TRACE.transactions[toRemove[ti]];
     }
     persist();
     return TRACE.events.length - 1;
@@ -400,7 +421,7 @@
     var har = {
       log: {
         version: "1.2",
-        creator: { name: "Web Request Tracer", version: "0.3.0" },
+        creator: { name: "Web Request Tracer", version: "0.4.0" },
         pages: [{
           startedDateTime: TRACE.meta.started_at,
           id: "page_1",
@@ -583,7 +604,7 @@
             url: u.href, host: u.host, pathname: u.pathname,
             method: t.method, query: u.query,
             headers: t.requestHeaders,
-            body: buildRecordedBody(u, parsedBody),
+            body: buildRecordedBody(parsedBody),
           },
           response: isError
             ? { error: "XHR error" }
@@ -603,6 +624,7 @@
 
       xhr.addEventListener("load", function() { done(false); });
       xhr.addEventListener("error", function() { done(true); });
+      xhr.addEventListener("abort", function() { done(true); });
       return originalXHRSend.apply(this, arguments);
     };
 
@@ -612,12 +634,12 @@
       var ts_start = new Date().toISOString();
       var input = args[0];
       var init = args[1] || {};
-      var url = typeof input === "string" ? input : (input && input.url) || String(input);
-      var method = String(init.method || (input && input.method) || "GET").toUpperCase();
+      var url = typeof input === "string" ? input : (input instanceof Request ? input.url : (input && input.url) || String(input));
+      var method = String(init.method || (input instanceof Request ? input.method : (input && input.method)) || "GET").toUpperCase();
 
       var reqHeaders = (function() {
         try {
-          var h = init.headers || (input && input.headers) || null;
+          var h = init.headers || (input instanceof Request ? input.headers : (input && input.headers)) || null;
           if (!h) return {};
           if (h instanceof Headers) { var o = {}; h.forEach(function(v, k) { o[k.toLowerCase()] = v; }); return o; }
           if (Array.isArray(h)) { var a = {}; for (var i = 0; i < h.length; i++) a[h[i][0].toLowerCase()] = h[i][1]; return a; }
@@ -642,7 +664,7 @@
             request: {
               url: _u.href, host: _u.host, pathname: _u.pathname,
               method: method, query: _u.query, headers: reqHeaders,
-              body: buildRecordedBody(_u, _parsedBody),
+              body: buildRecordedBody(_parsedBody),
             },
             error: toJsonSafe(err),
             page: { url: location.href, title: document.title },
@@ -678,7 +700,7 @@
         request: {
           url: u.href, host: u.host, pathname: u.pathname,
           method: method, query: u.query, headers: reqHeaders,
-          body: buildRecordedBody(u, parsedBody),
+          body: buildRecordedBody(parsedBody),
         },
         response: {
           status: res.status, statusText: res.statusText,
@@ -710,7 +732,6 @@
   // ── WebSocket hooks ──
   // ════════════════════════════════════════════════════════════
   var OriginalWebSocket = null;
-  var originalWSSend = null;
 
   var installWSHooks = function() {
     if (RUN.wsHooksInstalled) return;
@@ -788,6 +809,23 @@
         rec = attachTx(rec);
         var idx = addEvent(rec);
         if (rec.transactionId) touchTx(rec.transactionId, idx);
+      });
+
+      // Intercept property-based event handlers
+      ["onopen", "onmessage", "onclose", "onerror"].forEach(function(prop) {
+        var eventType = prop.slice(2); // "open", "message", "close", "error"
+        var _userHandler = null;
+        Object.defineProperty(ws, prop, {
+          configurable: true,
+          enumerable: true,
+          get: function() { return _userHandler; },
+          set: function(fn) { _userHandler = fn; }
+        });
+        ws.addEventListener(eventType, function(e) {
+          if (typeof _userHandler === "function") {
+            try { _userHandler.call(ws, e); } catch (err) { console.error("[wrt] ws handler error:", err); }
+          }
+        });
       });
 
       // wrap send
