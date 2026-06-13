@@ -187,7 +187,11 @@ web-request-tracer/
 ├── trace-recorder.user.js   # UserScript version (install via Tampermonkey)
 ├── test/
 │   ├── index.html           # Test page with buttons for all features
-│   └── test-server.py       # Local HTTP + WebSocket test server
+│   ├── test-server.py       # Local HTTP + WebSocket test server
+│   └── test-report.md       # Test report (v0.4.0 verification)
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
 └── README.md
 ```
 

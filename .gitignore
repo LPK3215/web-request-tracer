@@ -3,11 +3,19 @@
 .playwright-cli/
 *.yml
 
+# Node.js
+node_modules/
+
 # Python
 __pycache__/
 *.pyc
 *.pyo
+*.egg-info/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Build artifacts
+*.log
+*.tmp
