@@ -804,22 +804,22 @@
           if (rec.transactionId) touchTx(rec.transactionId, idx);
         });
 
-      // Intercept property-based event handlers
-      ["onopen", "onmessage", "onclose", "onerror"].forEach(function(prop) {
-        var eventType = prop.slice(2);
-        var _userHandler = null;
-        Object.defineProperty(ws, prop, {
-          configurable: true,
-          enumerable: true,
-          get: function() { return _userHandler; },
-          set: function(fn) { _userHandler = fn; }
+        // Intercept property-based event handlers
+        ["onopen", "onmessage", "onclose", "onerror"].forEach(function(prop) {
+          var eventType = prop.slice(2);
+          var _userHandler = null;
+          Object.defineProperty(ws, prop, {
+            configurable: true,
+            enumerable: true,
+            get: function() { return _userHandler; },
+            set: function(fn) { _userHandler = fn; }
+          });
+          ws.addEventListener(eventType, function(e) {
+            if (typeof _userHandler === "function") {
+              try { _userHandler.call(ws, e); } catch (err) { console.error("[wrt] ws handler error:", err); }
+            }
+          });
         });
-        ws.addEventListener(eventType, function(e) {
-          if (typeof _userHandler === "function") {
-            try { _userHandler.call(ws, e); } catch (err) { console.error("[wrt] ws handler error:", err); }
-          }
-        });
-      });
 
         // wrap send
         var origSend = ws.send;
